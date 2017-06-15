@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.2/themes/black-tie/jquery-ui.css" />
+  <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
+			
+	<script>
+
+	// Initialize Firebase
+	var config = {
+		apiKey: "API_KEY_HERE",
+		authDomain: "AUTH_DOMAIN_HERE",
+		databaseURL: "FIREBASE_URL_HERE",
+		projectId: "FIREBASE_PROJECT_ID_HERE",
+		storageBucket: "STORAGE_BUCKET_HERE",
+		messagingSenderId: "MESSAGING_SENDER_ID_HERE"
+	};
+	firebase.initializeApp(config);
+	
+	var rootPath = "products/";
+	var sortKey = "sort_key";
+	var dataRef = firebase.database().ref(rootPath);
+	
+	var queryData = function(key, callback) {
+		dataRef.orderByChild(sortKey).startAt(key.term.toLowerCase()).endAt(key.term.toLowerCase() + '\uf8ff').on("value", function(snapshot) {
+			var results = [];
+			snapshot.forEach(function(child) {
+				console.log(child.val().name);
+				results.push(child.val().name);
+			});
+			callback(results);
+		}, function (error) {
+		 console.log("Error: " + error.code);
+		});
+	};
+
+	var updateSortKey = function() {
+		var updates = {};
+		dataRef.on("value", function(snapshot) {
+			snapshot.forEach(function(child) {
+				if (child.val() && child.val().name) {
+					updates[child.getKey() + '/' + sortKey] = child.val().name.toLowerCase();
+				}
+			});
+			dataRef.update(updates);
+		}, function (error) {
+		 console.log("Error: " + error.code);
+		});
+	};
+	
+	</script>		
+</head>
+
+<body>
+  <h1>Autocomplete - Firebase Backend</h1>
+	<div class = "ui-widget">
+	 <p>Type 3 characters to trigger autocompletion</p>
+	 <label for = "autocomplete">Best Buy Products: </label>
+	 <input id = "autocomplete">
+</div>
+</body>
+ <script>
+	$('#autocomplete').autocomplete({
+		minLength: 3,
+		source: queryData
+	});
+ </script>
+</html>

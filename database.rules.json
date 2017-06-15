@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "products": {
+      ".indexOn": "sort_key"
+    },
+    ".read": true,
+    ".write": false
+  }
+}
